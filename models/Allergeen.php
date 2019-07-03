@@ -18,6 +18,8 @@ use Yii;
  */
 class Allergeen extends \yii\db\ActiveRecord
 {
+    
+    public $aantalproducten;
     /**
      * {@inheritdoc}
      */
