@@ -6,13 +6,36 @@ use yii\widgets\ActiveForm;
 /* @var $this yii\web\View */
 /* @var $model app\models\ProductSearch */
 /* @var $form yii\widgets\ActiveForm */
+
+$productgroeps=app\models\Productgroep::find()
+    ->leftJoin('product','product.productgroep_id=productgroep.id')
+    ->orderBy('productgroep.naam asc')
+    ->all();
+$allergenen=app\models\Allergeen::find()
+    ->leftJoin('allergeenproduct','allergeenproduct.allergeen_id=allergeen.id')
+    ->orderBy('allergeen.naam asc')
+    ->all();
+$ingredienten=  app\models\Ingredient::find()
+    ->leftJoin('ingredientproduct','ingredientproduct.ingredient_id=ingredient.id')
+    ->orderBy('ingredient.naam asc')
+    ->all();
+
+if(empty($model->productgroepen)){
+    $model->productgroepen= \yii\helpers\ArrayHelper::map($productgroeps,'id','id');
+}
+if(empty($model->allergenen)){
+    $model->allergenen=  [];
+}
+if(empty($model->ingredienten)){
+    $model->ingredienten=  [];
+}
 ?>
 
 <div class="product-search">
 
     <?php $form = ActiveForm::begin([
         'action' => ['site/index'],
-        'method' => 'post',
+        'method' => 'get',
         'options' => [
             'data-pjax' => 1
         ],
@@ -29,27 +52,23 @@ use yii\widgets\ActiveForm;
                         </a>
                     </h4>
                 </div>
-                <div id="categorie" class="panel-collapse collapse">
-                    <div class="panel-body">
-                        <a href="#" onclick="alert('resetcategorie');"><i class="far fa-square"></i> <?= Yii::t('app','alle productgroepen')?></a>
-                          <?php
-                                $productgroeps=app\models\Productgroep::find()
-                                    ->leftJoin('product','product.productgroep_id=productgroep.id')
-                                    ->select([
-                                        'productgroep.*',
-                                        'aantalproducten'=>new \yii\db\Expression('count(product.id)')
-                                    ])
-                                    ->orderBy('productgroep.naam asc')
-                                    ->groupBy('productgroep.id')
-                                    ->all();
-                                foreach($productgroeps as $pg){
+                <div id="categorie" class="panel-body collapse in">
+                    <?php
+                        foreach($productgroeps as $pg){
+                            if(in_array($pg->id, $model->productgroepen)){
                                 ?>
-                                    <a href="#" style="display:block;" onclick="togglecheckmark(this,'productgroep-<?=$pg->id?>')"><i class="far fa-square"></i> <?=$pg->naam?> <span class="aantalproducten">(<?= $pg->aantalproducten?>)</span></a>
-                                    <input type="checkbox" data-toggle="productgroep-<?=$pg->id?>" name="ProductSearch[productgroep_id][<?=$pg->id?>]" value="1" style="display:none" data-pjax="1">
+                                    <a href="#" style="display:block;" onclick="togglecheckmark(this,'productgroep-<?=$pg->id?>')"><i class="far fa-check-square"></i> <?=$pg->naam?></a>
+                                    <input type="checkbox" checked data-toggle="productgroep-<?=$pg->id?>" name="ProductSearch[productgroepen][]" value="<?=$pg->id?>" style="display:none" data-pjax="1">
                                 <?php
-                                }
-                          ?>
-                    </div>
+                            }
+                            else{
+                                ?>
+                                    <a href="#" style="display:block;" onclick="togglecheckmark(this,'productgroep-<?=$pg->id?>')" ><i class="far fa-square"></i> <?=$pg->naam?></a>
+                                    <input type="checkbox" data-toggle="productgroep-<?=$pg->id?>" name="ProductSearch[productgroepen][]" value="<?=$pg->id?>" style="display:none" data-pjax="1">
+                                <?php
+                            }
+                        }
+                    ?>
                 </div>
             </div>
             <div class="panel panel-default">
@@ -60,25 +79,25 @@ use yii\widgets\ActiveForm;
                         </a>
                     </h4>
                 </div>
-                <div id="allergenen" class="panel-collapse collapse">
-                    <div class="panel-body">
-                          <?php
-                            $allergenen=app\models\Allergeen::find()
-                                ->leftJoin('allergeenproduct','allergeenproduct.allergeen_id=allergeen.id')
-                                ->select([
-                                    'allergeen.*',
-                                    'aantalproducten'=>new \yii\db\Expression('count(allergeenproduct.id)')
-                                ])
-                                ->orderBy('allergeen.naam asc')
-                                ->groupBy('allergeen.id')
-                                ->all();
-                            foreach($allergenen as $a){
-                            ?>
-                                <p><?=$a->naam?> <span class="aantalproducten">(<?= $a->aantalproducten?>)</span></p>
-                            <?php
-                            }
-                          ?>
-                    </div>
+                <div id="allergenen" class="panel-body collapse in">
+     
+                    <?php
+                    
+                    foreach($allergenen as $a){
+                        if(in_array($a->id, $model->allergenen)){
+                    ?>
+                        <a href="#" style="display:block;" onclick="togglecheckmark(this,'allergeen-<?=$a->id?>')"><i class="far fa-check-square"></i> <?=$a->naam?></a>
+                        <input type="checkbox" checked data-toggle="allergeen-<?=$a->id?>" name="ProductSearch[allergenen][<?=$a->id?>]" value="<?=$a->id?>" style="display:none" data-pjax="1">
+                    <?php
+                        }
+                        else{
+                    ?>
+                        <a href="#" style="display:block;" onclick="togglecheckmark(this,'allergeen-<?=$a->id?>')"><i class="far fa-square"></i> <?=$a->naam?></a>
+                        <input type="checkbox" data-toggle="allergeen-<?=$a->id?>" name="ProductSearch[allergenen][<?=$a->id?>]" value="<?=$a->id?>" style="display:none" data-pjax="1">
+                    <?php
+                        }
+                    }
+                    ?>
                 </div>
             </div>
             <div class="panel panel-default">
@@ -89,25 +108,24 @@ use yii\widgets\ActiveForm;
                         </a>
                     </h4>
                 </div>
-                <div id="ingredienten" class="panel-collapse collapse">
-                    <div class="panel-body">
-                          <?php
-                            $ingredienten=  app\models\Ingredient::find()
-                                ->leftJoin('ingredientproduct','ingredientproduct.ingredient_id=ingredient.id')
-                                ->select([
-                                    'ingredient.*',
-                                    'aantalproducten'=>new \yii\db\Expression('count(ingredientproduct.id)')
-                                ])
-                                ->orderBy('ingredient.naam asc')
-                                ->groupBy('ingredient.id')
-                                ->all();
-                            foreach($ingredienten as $i){
-                            ?>
-                                <p><?=$i->naam?> <span class="aantalproducten">(<?= $i->aantalproducten?>)</span></p>
-                            <?php
-                            }
-                          ?>
-                    </div>
+                <div id="ingredienten" class="panel-body collapse in">
+                    <?php
+                   
+                    foreach($ingredienten as $i){
+                        if(in_array($i->id, $model->ingredienten)){
+                      ?>
+                        <a href="#" style="display:block;" onclick="togglecheckmark(this,'ingredient-<?=$i->id?>')"><i class="far fa-check-square"></i> <?=$i->naam?></a>
+                        <input type="checkbox" checked data-toggle="ingredient-<?=$i->id?>" name="ProductSearch[ingredienten][]" value="<?=$i->id?>" style="display:none" data-pjax="1">
+                      <?php
+                        }
+                        else{
+                      ?>
+                        <a href="#" style="display:block;" onclick="togglecheckmark(this,'ingredient-<?=$i->id?>','ingredient')"><i class="far fa-square"></i> <?=$i->naam?></a>
+                        <input type="checkbox" data-toggle="ingredient-<?=$i->id?>" name="ProductSearch[ingredienten][]" value="<?=$i->id?>" style="display:none" data-pjax="1">
+                      <?php      
+                        }
+                    }
+                    ?>
                 </div>
             </div>
         </div>
@@ -115,8 +133,8 @@ use yii\widgets\ActiveForm;
     
     
 
-    <div class="form-group">
-        <?= Html::submitButton(Yii::t('app', 'Search'), ['class' => 'btn btn-primary']) ?>
+    <div class="form-group" style="display:none;">
+        <?= Html::submitButton(Yii::t('app', 'Search'), ['class' => 'btn btn-primary','id'=>'btnsearchproduct']) ?>
         <?= Html::resetButton(Yii::t('app', 'Reset'), ['class' => 'btn btn-outline-secondary']) ?>
     </div>
 
@@ -127,7 +145,5 @@ use yii\widgets\ActiveForm;
 
 
 <?php
-$this->registerCss('[data-toggle="collapse"].collapsed > i {transform: rotate(180deg) ;}');
-        
-
+$this->registerCss('[data-toggle="collapse"]:not(.collapsed) > i {transform: rotate(180deg) ;}');
 ?>

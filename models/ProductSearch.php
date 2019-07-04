@@ -11,6 +11,9 @@ use app\models\Product;
  */
 class ProductSearch extends Product
 {
+    public $allergenen;
+    public $productgroepen;
+    public $ingredienten;
     /**
      * {@inheritdoc}
      */
@@ -18,7 +21,7 @@ class ProductSearch extends Product
     {
         return [
             [['id', 'created_by', 'updated_by', 'naam', 'foto', 'productgroep_id'], 'integer'],
-            [['created_at', 'updated_at'], 'safe'],
+            [['created_at', 'updated_at','productgroepen','allergenen','ingredienten'], 'safe'],
         ];
     }
 
@@ -51,6 +54,8 @@ class ProductSearch extends Product
         $this->load($params);
 
         if (!$this->validate()) {
+            print_r($this->errors);
+            die();
             // uncomment the following line if you do not want to return any records when validation fails
             // $query->where('0=1');
             return $dataProvider;
@@ -67,7 +72,41 @@ class ProductSearch extends Product
             'foto' => $this->foto,
             'productgroep_id' => $this->productgroep_id,
         ]);
-
+        
+        
+        $query->joinWith(['productgroep']);
+        
+        if(!empty($this->allergenen)){
+            $query->andFilterWhere(['not exists',
+                (new \yii\db\Query())
+                ->from('allergeenproduct')
+                ->andFilterWhere(['and',
+                    ['in','allergeen_id',$this->allergenen],
+                    ['=','allergeenproduct.product_id',new \yii\db\Expression('product.id')]
+                ])
+            ]);
+        }
+        if(!empty($this->ingredienten)){
+            $query->andFilterWhere(['not exists',
+                (new \yii\db\Query())
+                ->from('ingredientproduct')
+                ->andFilterWhere(['and',
+                    ['in','ingredient_id',$this->ingredienten],
+                    ['=','ingredientproduct.product_id',new \yii\db\Expression('product.id')]
+                ])
+            ]);
+        }
+        
+        $query->andFilterWhere([
+            'and',
+            ['in','productgroep_id',$this->productgroepen]
+        ]);
+        
+       
+        $query->groupBy('product.id');
+        
+        $query->orderBy('productgroep.naam asc ','product.naam asc');
+        
         return $dataProvider;
     }
 }
