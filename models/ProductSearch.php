@@ -54,26 +54,11 @@ class ProductSearch extends Product
         $this->load($params);
 
         if (!$this->validate()) {
-            print_r($this->errors);
-            die();
             // uncomment the following line if you do not want to return any records when validation fails
             // $query->where('0=1');
             return $dataProvider;
         }
 
-        // grid filtering conditions
-        $query->andFilterWhere([
-            'id' => $this->id,
-            'created_at' => $this->created_at,
-            'created_by' => $this->created_by,
-            'updated_at' => $this->updated_at,
-            'updated_by' => $this->updated_by,
-            'naam' => $this->naam,
-            'foto' => $this->foto,
-            'productgroep_id' => $this->productgroep_id,
-        ]);
-        
-        
         $query->joinWith(['productgroep']);
         
         if(!empty($this->allergenen)){
@@ -106,6 +91,49 @@ class ProductSearch extends Product
         $query->groupBy('product.id');
         
         $query->orderBy('productgroep.naam asc ','product.naam asc');
+        
+        return $dataProvider;
+    }
+    public function searchbeheer($params)
+    {
+        $query = Product::find();
+
+        // add conditions that should always apply here
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+        ]);
+
+        $this->load($params);
+        
+
+        if (!$this->validate()) {
+            // uncomment the following line if you do not want to return any records when validation fails
+            // $query->where('0=1');
+            return $dataProvider;
+        }
+        
+        // grid filtering conditions
+        $query->andFilterWhere([
+            'product.id' => $this->id,
+            'product.created_at' => $this->created_at,
+            'product.created_by' => $this->created_by,
+            'product.updated_at' => $this->updated_at,
+            'product.updated_by' => $this->updated_by,
+            'product.naam' => $this->naam,
+            'product.foto' => $this->foto,
+            'product.productgroep_id' => $this->productgroep_id,
+        ]);
+        
+        $query->orderBy('product.naam asc');
+        
+        $query->joinWith('productgroep');
+        
+        $query->addSelect([
+            'product.*',
+            'gridproductgroep'=>'productgroep.naam'
+        ]);
+        
         
         return $dataProvider;
     }

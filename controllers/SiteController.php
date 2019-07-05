@@ -93,6 +93,123 @@ class SiteController extends Controller
     }
 
     /**
+     * Signup action.
+     *
+     * @return Response|string
+     */
+    public function actionSignup()
+    {
+        if (!Yii::$app->user->isGuest) {
+            return $this->goHome();
+        }
+
+        $model = new \app\models\SignupForm();
+        if ($model->load(Yii::$app->request->post())) {
+            if($model->signup()){
+                $model->sendsignupmessage($this->renderPartial("@app/mail/activate",[
+                    'model'=>$model,
+                    'activationkey'=>$model->tempactkey
+                ]));
+                Yii::$app->session->setFlash('success','Registratie succesvol. Check je inbox om je account te activeren.');
+            }
+            else{
+                Yii::$app->session->setFlash('danger',"Registratie is niet gelukt. Misschien heeft dit email adres al een account?");
+            }
+            
+        }
+        return $this->render('signup', [
+            'model' => $model,
+        ]);
+    }
+    /**
+     * resetpassword action.
+     *
+     * @return Response|string
+     */
+    public function actionForgotpassword()
+    {
+        if (!Yii::$app->user->isGuest) {
+            return $this->goHome();
+        }
+
+        $model = new \app\models\ResetpasswordForm();
+        $model->scenario=  \app\models\ResetpasswordForm::SCENARIO_SENDPASSWORDKEY;
+        if ($model->load(Yii::$app->request->post())) {
+            if($model->setpasswordkey()){
+                $model->sendpasswordkey($this->renderPartial("@app/mail/resetpassword",[
+                    'model'=>$model,
+                    'resetpasswordkey'=>$model->tempresetpasswordkey
+                ]));
+                Yii::$app->session->setFlash('success','Aanvraag nieuw paswoord succesvol. Check je inbox om terug toegang te krijgen tot je account');
+            }
+            else{
+                Yii::$app->session->setFlash('danger',"Aanvraag nieuw paswoord is niet gelukt.");
+            }
+            return $this->redirect('index');
+            
+        }
+        return $this->render('forgotpassword', [
+            'model' => $model,
+        ]);
+    }
+    /**
+     * resetpassword action.
+     *
+     * @return Response|string
+     */
+    public function actionResetpassword($key='')
+    {
+        if (!Yii::$app->user->isGuest) {
+            return $this->goHome();
+        }
+
+        $model = new \app\models\ResetpasswordForm();
+        $model->scenario=  \app\models\ResetpasswordForm::SCENARIO_RESETPASSWORD;
+        if ($model->load(Yii::$app->request->post())) {
+            if($model->resetpassword($key)){
+                Yii::$app->session->setFlash('success','Uw account is geactiveerd. U kan zich nu aanmelden.');
+            }
+            else{
+                Yii::$app->session->setFlash('danger',"Resetten van paswoord is niet gelukt");
+            }
+        }
+        elseif($key!=''){
+            $user= \app\models\User::findIdentityByPasswordResetToken($key);
+
+            if(!empty($user)){
+                return $this->render('resetpassword', [
+                    'model' => $model,
+                    'key'=>$key
+                ]);
+            }
+            
+            
+        }
+        return $this->redirect('index');
+        
+        
+    }
+    public function actionSignupsuccessful(){
+        return $this->render('signupsuccessful');
+    }
+    public function actionSendpasswordsuccesful(){
+        return $this->render('sendpasswordsuccesful');
+    }
+
+    
+    public function actionActivate($key){
+        $user= \app\models\User::findIdentityByAccessToken($key);
+
+        if(!empty($user)){
+            if($user->activate($key)){
+                Yii::$app->session->setFlash('success','Uw account is geactiveerd. U kan zich nu aanmelden.');
+            }
+            
+        }
+        return $this->redirect('index');
+        
+    }
+    /**
      * Logout action.
      *
      * @return Response
@@ -101,7 +218,7 @@ class SiteController extends Controller
     {
         Yii::$app->user->logout();
 
-        return $this->goHome();
+        return $this->redirect('index');
     }
 
     /**

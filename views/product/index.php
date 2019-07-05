@@ -19,6 +19,9 @@ $this->params['breadcrumbs'][] = $this->title;
         </div>
         <div class="col-lg-10">
             <div id="product-results">
+                <div id="loading-div">
+                    <i class="fas fa-circle-notch fa-spin"></i>
+                </div>
                 <?php
                 foreach($dataProvider->getModels() as $product){
                 ?>
@@ -65,9 +68,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 <?php
                 }
                 ?>
-                <div id="loading-div">
-                    <i class="fas fa-circle-notch fa-spin"></i>
-                </div>
+                
             </div>
         </div>
     </div>

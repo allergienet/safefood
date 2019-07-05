@@ -1,55 +1,60 @@
 <?php
 
 namespace app\models;
+/*
+ * @property integer $id
+ * @property string $username
+ * @property string $activated
+ * @property string $password_hash
+ * @property string $activation_key
+ * @property string $password_resetkey
+ * @property integer $role
+ 
+ * @property Product[] $products
+ * @property Product[] $productsupdated
+*/
 
-class User extends \yii\base\BaseObject implements \yii\web\IdentityInterface
+
+class User extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
 {
-    public $id;
-    public $username;
     public $password;
     public $authKey;
-    public $accessToken;
-
-    private static $users = [
-        '100' => [
-            'id' => '100',
-            'username' => 'admin',
-            'password' => 'admin',
-            'authKey' => 'test100key',
-            'accessToken' => '100-token',
-        ],
-        '101' => [
-            'id' => '101',
-            'username' => 'demo',
-            'password' => 'demo',
-            'authKey' => 'test101key',
-            'accessToken' => '101-token',
-        ],
-    ];
-
+    
+    const ROLE_USER=1;
+    const ROLE_VOEDINGSDESKUNDIGE=2;
+    const ROLE_PRODUCENT=3;
+    
+    
+    /**
+     * @inheritdoc
+     */
+    public static function tableName()
+    {
+        return 'user';
+    }
+    
 
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      */
     public static function findIdentity($id)
     {
-        return isset(self::$users[$id]) ? new static(self::$users[$id]) : null;
+        return static::findOne(['id' => $id]);
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      */
     public static function findIdentityByAccessToken($token, $type = null)
     {
-        foreach (self::$users as $user) {
-            if ($user['accessToken'] === $token) {
-                return new static($user);
-            }
-        }
-
-        return null;
+        return static::findOne(['activation_key' => $token]);
     }
 
+    public static function findIdentityByPasswordResetToken($token, $type = null)
+    {
+        return static::findOne(['password_resetkey' => $token]);
+    }
+    
     /**
      * Finds user by username
      *
@@ -58,13 +63,7 @@ class User extends \yii\base\BaseObject implements \yii\web\IdentityInterface
      */
     public static function findByUsername($username)
     {
-        foreach (self::$users as $user) {
-            if (strcasecmp($user['username'], $username) === 0) {
-                return new static($user);
-            }
-        }
-
-        return null;
+        return static::findOne(['username' => $username,'activated'=>1]);
     }
 
     /**
@@ -80,7 +79,12 @@ class User extends \yii\base\BaseObject implements \yii\web\IdentityInterface
      */
     public function getAuthKey()
     {
-        return $this->authKey;
+        return $this->activation_key;
+    }
+    
+    public function getPasswordresetkey()
+    {
+        return $this->password_resetkey;
     }
 
     /**
@@ -88,9 +92,39 @@ class User extends \yii\base\BaseObject implements \yii\web\IdentityInterface
      */
     public function validateAuthKey($authKey)
     {
-        return $this->authKey === $authKey;
+        return $this->activation_key === $authKey;
     }
 
+    /**$password
+     * Generates password hash from password and sets it to the model
+     *
+     * @param string $password
+     */
+    public function setPassword($password)
+    {
+        $this->password_hash = \Yii::$app->security->generatePasswordHash($password);
+    }
+    /**$password
+     * Generates password hash from password and sets it to the model
+     *
+     * @param string $password
+     */
+    public function setActivationkey()
+    {
+        $this->activation_key = \Yii::$app->security->generatePasswordHash(random_bytes(15));
+    }
+    
+    
+    public function setpasswordresetkey()
+    {
+        $this->password_resetkey = \Yii::$app->security->generatePasswordHash(random_bytes(15));
+    }
+    
+    public function validatePasswordKey($passkey)
+    {
+        return $this->password_resetkey === $passkey;
+    }
+    
     /**
      * Validates password
      *
@@ -99,6 +133,37 @@ class User extends \yii\base\BaseObject implements \yii\web\IdentityInterface
      */
     public function validatePassword($password)
     {
-        return $this->password === $password;
+        return \Yii::$app->security->validatePassword($password, $this->password_hash);
     }
+    
+    public function activate($key){
+        if($this->validateAuthKey($key)){
+            $this->updateAttributes(['activated'=>1,'activation_key'=>null]);
+            return true;
+        }
+        return false;
+    }
+    
+    public function deactivate(){
+        $this->setpasswordresetkey();
+        $this->updateAttributes(['activated'=>0,'password_resetkey'=>$this->password_resetkey]);
+        return true;
+    }
+    
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getProducts()
+    {
+        return $this->hasMany(Product::className(), ['created_by' => 'id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getProductsupdated()
+    {
+        return $this->hasMany(Product::className(), ['updated_by' => 'id']);
+    }
+    
 }

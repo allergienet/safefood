@@ -8,7 +8,9 @@ use app\models\ProductSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
-
+use yii\filters\AccessControl;
+use app\components\AccessRule;
+use app\models\User;
 /**
  * ProductController implements the CRUD actions for Product model.
  */
@@ -26,6 +28,34 @@ class ProductController extends Controller
                     'delete' => ['POST'],
                 ],
             ],
+            'access' => [
+                   'class' => AccessControl::className(),
+                   // We will override the default rule config with the new AccessRule class
+                   'ruleConfig' => [
+                       'class' => AccessRule::className(),
+                   ],
+                   'only' => ['index','create', 'update', 'delete','view'],
+                   'rules' => [
+                       [
+                           'actions' => ['index','create','update','delete'],
+                           'allow' => true,
+                           'roles' => [
+                               User::ROLE_PRODUCENT
+                           ],
+                       ],
+                       
+                       [
+                           'actions' => ['view'],
+                           'allow' => true,
+                           // Allow admins to delete
+                           'roles' => [
+                               User::ROLE_USER,
+                               User::ROLE_VOEDINGSDESKUNDIGE,
+                               User::ROLE_PRODUCENT
+                           ],
+                       ],
+                   ],
+               ],  
         ];
     }
 
@@ -36,9 +66,10 @@ class ProductController extends Controller
     public function actionIndex()
     {
         $searchModel = new ProductSearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+        $searchModel->created_by=Yii::$app->user->id;
+        $dataProvider = $searchModel->searchbeheer(Yii::$app->request->queryParams);
 
-        return $this->render('index', [
+        return $this->render('beheer', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
         ]);
@@ -67,7 +98,8 @@ class ProductController extends Controller
         $model = new Product();
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id]);
+            Yii::$app->session->setFlash('success',Yii::t('app','Product is toegevoegd'));
+            return $this->redirect(['update', 'id' => $model->id]);
         }
 
         return $this->render('create', [
@@ -87,7 +119,8 @@ class ProductController extends Controller
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id]);
+            Yii::$app->session->setFlash('success',Yii::t('app','Product is aangepast'));
+            return $this->redirect(['update', 'id' => $model->id]);
         }
 
         return $this->render('update', [
@@ -105,8 +138,26 @@ class ProductController extends Controller
     public function actionDelete($id)
     {
         $this->findModel($id)->delete();
-
+        Yii::$app->session->setFlash('success',Yii::t('app','Product is verwijderd'));
         return $this->redirect(['index']);
+    }
+    
+    
+    public function actionDelimage($id){
+        $model=$this->findModel($id);
+        
+        if(file_exists($model->foto)){
+            Yii::$app->session->setFlash('success',Yii::t('app','De foto werd verwijderd'));
+            unlink($model->foto);
+            $model->updateAttributes([
+                'foto'=>null
+            ]);
+        }
+        else{
+            Yii::$app->session->setFlash('danger',Yii::t('app','De foto werd niet gevonden'));
+        }
+        
+        return $this->redirect(['update','id'=>$id]);
     }
 
     /**
