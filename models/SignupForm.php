@@ -55,7 +55,7 @@ class SignupForm extends Model
         return [ 
             User::ROLE_USER=>Yii::t('app','Gebruiker'),
             User::ROLE_VOEDINGSDESKUNDIGE=>Yii::t('app','Voedingsdeskundige'),
-            User::ROLE_PRODUCENTe=>Yii::t('app','Producent') 
+            User::ROLE_PRODUCENT=>Yii::t('app','Producent') 
         ];
     }
 
@@ -124,7 +124,7 @@ class SignupForm extends Model
         if(
             Yii::$app->mailer->compose('@app/mail/layouts/html.php',['content'=>$body])
             ->setTo($this->username)
-            ->setFrom(['inf@safefood.be' => 'Safefood'])
+            ->setFrom(['info@safefood.be' => 'Safefood'])
             ->setSubject('Safefood - Account confirmatie')
             ->send()){
                 return true;
