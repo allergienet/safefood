@@ -8,15 +8,12 @@ use yii\widgets\ActiveForm;
 /* @var $form yii\widgets\ActiveForm */
 
 $productgroeps=app\models\Productgroep::find()
-    ->leftJoin('product','product.productgroep_id=productgroep.id')
     ->orderBy('productgroep.naam asc')
     ->all();
 $allergenen=app\models\Allergeen::find()
-    ->leftJoin('allergeenproduct','allergeenproduct.allergeen_id=allergeen.id')
     ->orderBy('allergeen.naam asc')
     ->all();
 $ingredienten=  app\models\Ingredient::find()
-    ->leftJoin('ingredientproduct','ingredientproduct.ingredient_id=ingredient.id')
     ->orderBy('ingredient.naam asc')
     ->all();
 
@@ -34,7 +31,7 @@ if(empty($model->ingredienten)){
 <div class="product-search">
 
     <?php $form = ActiveForm::begin([
-        'action' => ['site/index'],
+        'action' => ['site/index','manualsearch'=>true],
         'method' => 'get',
         'options' => [
             'data-pjax' => 1
@@ -57,13 +54,13 @@ if(empty($model->ingredienten)){
                         foreach($productgroeps as $pg){
                             if(in_array($pg->id, $model->productgroepen)){
                                 ?>
-                                    <a href="#" style="display:block;" onclick="togglecheckmark(this,'productgroep-<?=$pg->id?>')"><i class="far fa-check-square"></i> <?=$pg->naam?></a>
+                                    <a href="#" style="display:block;" onclick="togglecheckmark(this,'productgroep-<?=$pg->id?>','check')"><i class="far fa-check-square"></i> <?=$pg->naam?></a>
                                     <input type="checkbox" checked data-toggle="productgroep-<?=$pg->id?>" name="ProductSearch[productgroepen][]" value="<?=$pg->id?>" style="display:none" data-pjax="1">
                                 <?php
                             }
                             else{
                                 ?>
-                                    <a href="#" style="display:block;" onclick="togglecheckmark(this,'productgroep-<?=$pg->id?>')" ><i class="far fa-square"></i> <?=$pg->naam?></a>
+                                    <a href="#" style="display:block;" onclick="togglecheckmark(this,'productgroep-<?=$pg->id?>','check')" ><i class="far fa-square"></i> <?=$pg->naam?></a>
                                     <input type="checkbox" data-toggle="productgroep-<?=$pg->id?>" name="ProductSearch[productgroepen][]" value="<?=$pg->id?>" style="display:none" data-pjax="1">
                                 <?php
                             }
@@ -86,13 +83,13 @@ if(empty($model->ingredienten)){
                     foreach($allergenen as $a){
                         if(in_array($a->id, $model->allergenen)){
                     ?>
-                        <a href="#" style="display:block;" onclick="togglecheckmark(this,'allergeen-<?=$a->id?>')"><i class="far fa-check-square"></i> <?=$a->naam?></a>
+                        <a href="#" style="display:block;" onclick="togglecheckmark(this,'allergeen-<?=$a->id?>','minus')"><i class="far fa-minus-square"></i> <?=$a->naam?></a>
                         <input type="checkbox" checked data-toggle="allergeen-<?=$a->id?>" name="ProductSearch[allergenen][<?=$a->id?>]" value="<?=$a->id?>" style="display:none" data-pjax="1">
                     <?php
                         }
                         else{
                     ?>
-                        <a href="#" style="display:block;" onclick="togglecheckmark(this,'allergeen-<?=$a->id?>')"><i class="far fa-square"></i> <?=$a->naam?></a>
+                        <a href="#" style="display:block;" onclick="togglecheckmark(this,'allergeen-<?=$a->id?>','minus')"><i class="far fa-square"></i> <?=$a->naam?></a>
                         <input type="checkbox" data-toggle="allergeen-<?=$a->id?>" name="ProductSearch[allergenen][<?=$a->id?>]" value="<?=$a->id?>" style="display:none" data-pjax="1">
                     <?php
                         }
@@ -114,13 +111,13 @@ if(empty($model->ingredienten)){
                     foreach($ingredienten as $i){
                         if(in_array($i->id, $model->ingredienten)){
                       ?>
-                        <a href="#" style="display:block;" onclick="togglecheckmark(this,'ingredient-<?=$i->id?>')"><i class="far fa-check-square"></i> <?=$i->naam?></a>
+                        <a href="#" style="display:block;" onclick="togglecheckmark(this,'ingredient-<?=$i->id?>','minus')"><i class="far fa-minus-square"></i> <?=$i->naam?></a>
                         <input type="checkbox" checked data-toggle="ingredient-<?=$i->id?>" name="ProductSearch[ingredienten][]" value="<?=$i->id?>" style="display:none" data-pjax="1">
                       <?php
                         }
                         else{
                       ?>
-                        <a href="#" style="display:block;" onclick="togglecheckmark(this,'ingredient-<?=$i->id?>','ingredient')"><i class="far fa-square"></i> <?=$i->naam?></a>
+                        <a href="#" style="display:block;" onclick="togglecheckmark(this,'ingredient-<?=$i->id?>','ingredient','minus')"><i class="far fa-square"></i> <?=$i->naam?></a>
                         <input type="checkbox" data-toggle="ingredient-<?=$i->id?>" name="ProductSearch[ingredienten][]" value="<?=$i->id?>" style="display:none" data-pjax="1">
                       <?php      
                         }

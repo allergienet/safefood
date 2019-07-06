@@ -15,6 +15,7 @@ use Yii;
  * @property string $naam
  *
  * @property Allergeenproduct[] $allergeenproducts
+ * @property Patientallergeen[] $patientallergeens
  */
 class Allergeen extends \yii\db\ActiveRecord
 {
@@ -62,4 +63,11 @@ class Allergeen extends \yii\db\ActiveRecord
     {
         return $this->hasMany(Allergeenproduct::className(), ['allergeen_id' => 'id']);
     }
+     /** 
+     * @return \yii\db\ActiveQuery 
+     */ 
+    public function getPatientallergeens() 
+    { 
+        return $this->hasMany(Patientallergeen::className(), ['allergeen_id' => 'id']);
+    } 
 }

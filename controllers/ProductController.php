@@ -34,13 +34,12 @@ class ProductController extends Controller
                    'ruleConfig' => [
                        'class' => AccessRule::className(),
                    ],
-                   'only' => ['index','create', 'update', 'delete','view'],
                    'rules' => [
                        [
                            'actions' => ['index','create','update','delete'],
                            'allow' => true,
                            'roles' => [
-                               User::ROLE_PRODUCENT
+                               User::ROLE_PRODUCENT,
                            ],
                        ],
                        

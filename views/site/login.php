@@ -11,6 +11,7 @@ use yii\bootstrap\ActiveForm;
 ?>   
 <div class="login-wrapper">
     <div class="login-content">
+        <h2 style="margin-top:0px;">Welkom terug</h2>
         <?php $form = ActiveForm::begin([
             'action'=>['site/login'],
             'method'=>'POST',
@@ -30,8 +31,8 @@ use yii\bootstrap\ActiveForm;
         
 
 
-        <?= Html::submitButton('Aanmelden', ['class' => 'btn btn-primary', 'name' => 'login-button']) ?>
-        <?= Html::a('Registreren',['site/signup'], ['class' => 'btn btn-primary', 'name' => 'register-button']) ?>
+        <?= Html::submitButton('Aanmelden', ['class' => 'btn btn-success fullwidth', 'name' => 'login-button']) ?>
+        <?= Html::a('Registreren',['site/signup'], ['class' => 'btn btn-primary fullwidth', 'name' => 'register-button']) ?>
 
         <div id="forgotpassword-wrapper">
             <?= Html::a('paswoord vergeten?',['site/forgotpassword'],['style'=>'font-size: 80%;']) ?>           

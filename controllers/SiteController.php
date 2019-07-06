@@ -59,14 +59,15 @@ class SiteController extends Controller
      *
      * @return string
      */
-    public function actionIndex()
+    public function actionIndex($manualsearch=false)
     {
         $searchModel = new \app\models\ProductSearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams,$manualsearch);
 
         return $this->render('@app/views/product/index', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
+            'manualsearch'=>$manualsearch
         ]);
     }
 
@@ -87,9 +88,7 @@ class SiteController extends Controller
         }
 
         $model->password = '';
-        return $this->render('login', [
-            'model' => $model,
-        ]);
+        return $this->goBack();
     }
 
     /**
@@ -97,20 +96,34 @@ class SiteController extends Controller
      *
      * @return Response|string
      */
-    public function actionSignup()
+    public function actionSignup($key="")
     {
         if (!Yii::$app->user->isGuest) {
             return $this->goHome();
         }
+        
+        if(!empty($key)){
+            $patient=\app\models\Patient::findOne(['signupkey'=>$key]);
+            if(empty($patient)){
+                return $this->goHome();
+            }
+        }
 
         $model = new \app\models\SignupForm();
+        
         if ($model->load(Yii::$app->request->post())) {
-            if($model->signup()){
+            if(!empty($patient)){
+                $model->signuppatient($patient);
+                Yii::$app->session->setFlash('success','Registratie succesvol. U kan nu inloggen.');
+                return $this->redirect('index');
+            }
+            elseif($model->signup()){
                 $model->sendsignupmessage($this->renderPartial("@app/mail/activate",[
                     'model'=>$model,
                     'activationkey'=>$model->tempactkey
                 ]));
                 Yii::$app->session->setFlash('success','Registratie succesvol. Check je inbox om je account te activeren.');
+                return $this->redirect('index');
             }
             else{
                 Yii::$app->session->setFlash('danger',"Registratie is niet gelukt. Misschien heeft dit email adres al een account?");
@@ -119,6 +132,7 @@ class SiteController extends Controller
         }
         return $this->render('signup', [
             'model' => $model,
+            'key'=> $key
         ]);
     }
     /**
@@ -202,6 +216,7 @@ class SiteController extends Controller
 
         if(!empty($user)){
             if($user->activate($key)){
+                $user->asignprofile();
                 Yii::$app->session->setFlash('success','Uw account is geactiveerd. U kan zich nu aanmelden.');
             }
             

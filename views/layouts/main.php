@@ -40,12 +40,10 @@ AppAsset::register($this);
         'encodeLabels' => false,
         'options' => ['class' => 'navbar-nav navbar-right'],
         'items' => [
-            ['label' => 'Home', 'url' => ['/site/index']],
-            ['label' => 'About', 'url' => ['/site/about']],
-            ['label' => 'Contact', 'url' => ['/site/contact']],
+            ['label' => Yii::t('app','Over ons'), 'url' => ['/site/about']],
             Yii::$app->user->isGuest ? (
                 [
-                    'label' => '<i class="fa fa-user"></i> Login',
+                    'label' => '<i class="fa fa-user"></i> Inloggen',
                     'items' => [
                         $this->render('@app/views/site/login',[
                             'model'=>new app\models\LoginForm()
@@ -70,23 +68,21 @@ AppAsset::register($this);
     ?>
 
     <div class="container">
-        <?php /**
+        <?php
+        if(in_array(Yii::$app->controller->id,["product","patient","dietist"])){
+        ?>
         <?= Breadcrumbs::widget([
             'links' => isset($this->params['breadcrumbs']) ? $this->params['breadcrumbs'] : [],
         ]) ?>
-         * 
-         */
+        <?php 
+        
+        } 
         ?>
         <?= Alert::widget() ?>
         <?= $content ?>
     </div>
 </div>
 
-<footer class="footer">
-    <div class="container">
-        <p class="pull-left">&copy; Safefood <?= date('Y') ?></p>
-    </div>
-</footer>
 
 <?php $this->endBody() ?>
 </body>

@@ -6,7 +6,7 @@ use dmstr\widgets\Alert;
 
 use yii\helpers\Html;
 use app\models\ContactForm;
-$this->title = 'Klasmixer';
+$this->title = 'Safefood';
 ?>
 <div class="site-login">
     

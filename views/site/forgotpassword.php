@@ -14,9 +14,8 @@ use app\models\ContactForm;
             <h4>Paswoord vergeten</h4>
             <?php $form = ActiveForm::begin([
                 'id' => 'login-form',
-                'layout' => 'horizontal',
                 'fieldConfig' => [
-                    'template' => "{label}\n<div class=\"col-sm-12\">{input}</div>\n<div class=\"col-sm-12\">{error}</div>",
+                    'template' => "<div class=\"row\">{label}\n<div class=\"col-sm-12\">{input}</div>\n<div class=\"col-sm-12\">{error}</div></div>",
                     'labelOptions' => ['class' => 'col-sm-12 control-label text-left'],
                 ],
             ]); ?>
@@ -24,14 +23,9 @@ use app\models\ContactForm;
             <?= $form->field($model, 'username')->textInput() ?>
 
 
-            <div class="form-group">
+            <div class="form-group row">
                 <div class="col-sm-12">
                     <?= Html::submitButton('Nieuw paswoord registreren', ['class' => 'full-width btn btn-primary', 'name' => 'login-button']) ?>
-                </div>
-            </div>
-            <div class="form-group">
-                <div class="col-sm-12">
-                    <?= Html::a('registreren',['site/signup'],['style'=>'color: #288ae6']) ?>
                 </div>
             </div>
 

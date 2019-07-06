@@ -3,6 +3,7 @@
 namespace app\models;
 
 use Yii;
+use yii\behaviors\BlameableBehavior;
 
 /**
  * This is the model class for table "allergeenproduct".
@@ -19,6 +20,8 @@ use Yii;
  *
  * @property Allergeen $allergeen
  * @property Product $product
+ * @property User $createdBy 
+ * @property User $updatedBy
  */
 class Allergeenproduct extends \yii\db\ActiveRecord
 {
@@ -41,6 +44,19 @@ class Allergeenproduct extends \yii\db\ActiveRecord
             [['bevatsporen', 'bevatinproductielijn'], 'boolean'],
             [['allergeen_id'], 'exist', 'skipOnError' => true, 'targetClass' => Allergeen::className(), 'targetAttribute' => ['allergeen_id' => 'id']],
             [['product_id'], 'exist', 'skipOnError' => true, 'targetClass' => Product::className(), 'targetAttribute' => ['product_id' => 'id']],
+            [['created_by'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['created_by' => 'id']], 
+            [['updated_by'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['updated_by' => 'id']], 
+        ];
+    }
+    
+    public function behaviors()
+    {
+        return [
+            [
+                'class' => BlameableBehavior::className(),
+                'createdByAttribute' => 'created_by',
+                'updatedByAttribute' => 'updated_by',
+            ],
         ];
     }
 
@@ -76,5 +92,21 @@ class Allergeenproduct extends \yii\db\ActiveRecord
     public function getProduct()
     {
         return $this->hasOne(Product::className(), ['id' => 'product_id']);
+    }
+    
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getCreatedBy()
+    {
+        return $this->hasOne(User::className(), ['id' => 'created_by']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getUpdatedBy()
+    {
+        return $this->hasOne(User::className(), ['id' => 'updated_by']);
     }
 }

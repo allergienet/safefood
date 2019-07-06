@@ -6,7 +6,6 @@
 
 use yii\helpers\Html;
 use yii\bootstrap\ActiveForm;
-use app\models\ContactForm;
 ?>
 <div class="resetpassword-wrapper">
     <div class="resetpassword-content">
@@ -17,7 +16,7 @@ use app\models\ContactForm;
                 'id' => 'login-form',
                 'layout' => 'horizontal',
                 'fieldConfig' => [
-                    'template' => "{label}\n<div class=\"col-sm-12\">{input}</div>\n<div class=\"col-sm-12\">{error}</div>",
+                    'template' => "<div class=\"row\">{label}\n<div class=\"col-sm-12\">{input}</div>\n<div class=\"col-sm-12\">{error}</div></div>",
                     'labelOptions' => ['class' => 'col-sm-12 control-label text-left'],
                 ],
             ]); ?>
@@ -27,14 +26,9 @@ use app\models\ContactForm;
             <?= $form->field($model, 'password_repeat')->passwordInput() ?>
 
 
-            <div class="form-group">
+            <div class="form-group row">
                 <div class="col-sm-12">
                     <?= Html::submitButton('Paswoord aanpassen', ['class' => 'full-width btn btn-primary', 'name' => 'login-button']) ?>
-                </div>
-            </div>
-            <div class="form-group">
-                <div class="col-sm-12">
-                    <?= Html::a('registeren',['site/signup'],['style'=>'color: #288ae6']) ?>
                 </div>
             </div>
 

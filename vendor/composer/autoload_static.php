@@ -32,9 +32,19 @@ class ComposerStaticInit1972f8eecdf0a3ad9eccd21e38255049
             'yii\\bootstrap\\' => 14,
             'yii\\' => 4,
         ),
+        'v' => 
+        array (
+            'vova07\\imperavi\\tests\\' => 22,
+            'vova07\\imperavi\\' => 16,
+        ),
         'p' => 
         array (
             'phpDocumentor\\Reflection\\' => 25,
+        ),
+        'k' => 
+        array (
+            'kartik\\select2\\' => 15,
+            'kartik\\base\\' => 12,
         ),
         'c' => 
         array (
@@ -122,11 +132,27 @@ class ComposerStaticInit1972f8eecdf0a3ad9eccd21e38255049
         array (
             0 => __DIR__ . '/..' . '/yiisoft/yii2',
         ),
+        'vova07\\imperavi\\tests\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/vova07/yii2-imperavi-widget/tests',
+        ),
+        'vova07\\imperavi\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/vova07/yii2-imperavi-widget/src',
+        ),
         'phpDocumentor\\Reflection\\' => 
         array (
             0 => __DIR__ . '/..' . '/phpdocumentor/reflection-common/src',
             1 => __DIR__ . '/..' . '/phpdocumentor/reflection-docblock/src',
             2 => __DIR__ . '/..' . '/phpdocumentor/type-resolver/src',
+        ),
+        'kartik\\select2\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/kartik-v/yii2-widget-select2/src',
+        ),
+        'kartik\\base\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/kartik-v/yii2-krajee-base/src',
         ),
         'cebe\\markdown\\' => 
         array (

@@ -16,9 +16,6 @@ $productgroepen=ArrayHelper::map(app\models\Productgroep::find()
     ->all(),'id','naam');
 ?>
 <div class="product-index">
-
-    <h1><?= Html::encode($this->title) ?></h1>
-
     <p>
         <?= Html::a(Yii::t('app', 'Product toevoegen'), ['create'], ['class' => 'btn btn-success']) ?>
     </p>
@@ -34,7 +31,12 @@ $productgroepen=ArrayHelper::map(app\models\Productgroep::find()
                 'value'=>function($m){
                     return Html::img("@web/".$m->foto);
                 },
-                'format'=>'raw'
+                'format'=>'raw',
+                'contentOptions' => function ($model, $key, $index, $column) {
+                    return [
+                        'style' => 'padding:0;width:200px;'
+                    ];
+                },
             ],
             'naam',
             [
@@ -44,7 +46,40 @@ $productgroepen=ArrayHelper::map(app\models\Productgroep::find()
                         $productgroepen,
                         ['class' => 'form-control','prompt'=>'selecteer productgroep'])
             ],
-            ['class' => 'yii\grid\ActionColumn'],
+            [
+                'class' => 'yii\grid\ActionColumn',
+                'contentOptions' => function ($model, $key, $index, $column) {
+                    return [
+                        'style' => 'padding:0'
+                    ];
+                },
+                'template'=>'{update}{delete}',
+                'buttons' => [
+                'view' => function ($url, $model) {
+                    return Html::a('<span class="glyphicon glyphicon-eye-open"></span>', $url, [
+                                'title' => Yii::t('app', 'lead-view'),
+                    ]);
+                },
+
+                'update' => function ($url, $model) {
+                    return Html::a('<span class="glyphicon glyphicon-pencil"></span>', $url, [
+                                'title' => Yii::t('app', 'lead-update'),
+                                'class'=>'btn btn-primary'
+                    ]);
+                },
+                'delete' => function ($url, $model) {
+                    return Html::a('<span class="glyphicon glyphicon-trash"></span>', $url, [
+                                'title' => Yii::t('app', 'lead-delete'),
+                                'class'=>'btn btn-danger',
+                                'data' => [
+                                    'confirm' => Yii::t('app', 'Are you sure you want to delete this item?'),
+                                    'method' => 'post',
+                                ],
+                    ]);
+                }
+
+                ],
+            ],
         ],
     ]); ?>
 

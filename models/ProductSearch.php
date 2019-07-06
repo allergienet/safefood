@@ -20,7 +20,8 @@ class ProductSearch extends Product
     public function rules()
     {
         return [
-            [['id', 'created_by', 'updated_by', 'naam', 'foto', 'productgroep_id'], 'integer'],
+            [['naam','foto'],'string'],
+            [['id', 'created_by', 'updated_by', 'productgroep_id'], 'integer'],
             [['created_at', 'updated_at','productgroepen','allergenen','ingredienten'], 'safe'],
         ];
     }
@@ -41,7 +42,7 @@ class ProductSearch extends Product
      *
      * @return ActiveDataProvider
      */
-    public function search($params)
+    public function search($params,$manualsearch)
     {
         $query = Product::find();
 
@@ -60,6 +61,27 @@ class ProductSearch extends Product
         }
 
         $query->joinWith(['productgroep']);
+        if(!\Yii::$app->user->isGuest){
+            if(\Yii::$app->user->identity->role== User::ROLE_USER && !$manualsearch){
+                $this->allergenen= \yii\helpers\ArrayHelper::map(
+                    Patientallergeen::find()
+                    ->where([
+                    'patient_id'=> Patient::getprofile()->id
+                    ])->all(),
+                'allergeen_id',
+                'allergeen_id'
+                );
+                $this->ingredienten= \yii\helpers\ArrayHelper::map(
+                    Patientingredient::find()
+                    ->where([
+                    'patient_id'=> Patient::getprofile()->id
+                    ])->all(),
+                'ingredient_id',
+                'ingredient_id'
+                );
+            }
+        }
+        
         
         if(!empty($this->allergenen)){
             $query->andFilterWhere(['not exists',
@@ -120,10 +142,12 @@ class ProductSearch extends Product
             'product.created_by' => $this->created_by,
             'product.updated_at' => $this->updated_at,
             'product.updated_by' => $this->updated_by,
-            'product.naam' => $this->naam,
+
             'product.foto' => $this->foto,
             'product.productgroep_id' => $this->productgroep_id,
         ]);
+        
+        $query->andFilterWhere(['like','product.naam',$this->naam]);
         
         $query->orderBy('product.naam asc');
         

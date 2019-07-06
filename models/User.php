@@ -4,7 +4,7 @@ namespace app\models;
 /*
  * @property integer $id
  * @property string $username
- * @property string $activated
+ * @property integer $activated
  * @property string $password_hash
  * @property string $activation_key
  * @property string $password_resetkey
@@ -20,9 +20,9 @@ class User extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
     public $password;
     public $authKey;
     
-    const ROLE_USER=1;
-    const ROLE_VOEDINGSDESKUNDIGE=2;
-    const ROLE_PRODUCENT=3;
+    const ROLE_USER=10;
+    const ROLE_VOEDINGSDESKUNDIGE=20;
+    const ROLE_PRODUCENT=30;
     
     
     /**
@@ -166,4 +166,17 @@ class User extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
         return $this->hasMany(Product::className(), ['updated_by' => 'id']);
     }
     
+    public function asignprofile(){
+        if($this->role===User::ROLE_USER){
+            $profile=new Patient();
+            $profile->user_id=$this->id;
+        }
+        elseif($this->role===User::ROLE_VOEDINGSDESKUNDIGE){
+            $profile=new Dietist();
+            $profile->user_id=$this->id;
+        }
+        if(isset($profile)){
+            $profile->save();
+        }
+    }
 }

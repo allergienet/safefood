@@ -43,7 +43,7 @@ class SignupForm extends Model
     public function rules()
     {
         return [
-        [['password','username','password_repeat'], 'required'],
+        [['password','username','password_repeat','type'], 'required'],
         ['password', 'string', 'min' => 6],
         ['password_repeat', 'compare', 'compareAttribute'=>'password' ],
         ['username','email']
@@ -53,9 +53,9 @@ class SignupForm extends Model
     
     public function getusertypes(){
         return [ 
-            1=>Yii::t('app','gebruiker'),
-            2=>Yii::t('app','voedingsdeskundige'),
-            3=>Yii::t('app','producent') 
+            User::ROLE_USER=>Yii::t('app','Gebruiker'),
+            User::ROLE_VOEDINGSDESKUNDIGE=>Yii::t('app','Voedingsdeskundige'),
+            User::ROLE_PRODUCENTe=>Yii::t('app','Producent') 
         ];
     }
 
@@ -87,7 +87,38 @@ class SignupForm extends Model
         }
         return false;
     }
+    /**
+     * signs up a user using the provided username.
+     * @return bool whether registration is success
+     */
+    public function signuppatient($patient)
+    {
+        if ($this->validate()) {
+            $user = $this->getUser();
+            if(!$user){
+                
+                //user bestaat nog niet
+                $newuser=new User([
+                    'username'=>$this->username,
+                    'role'=>$this->type,
+                    'activated'=>1
+                ]);
+                $newuser->setPassword($this->password);
+                $newuser->save();
+                
+                $patient->updateAttributes([
+                    'user_id'=>$newuser->id,
+                    'signupkey'=>null
+                ]);
+                return true;
+            }
+            
+        }
+        return false;
+    }
 
+    
+    
     public function sendsignupmessage($body)
     {
         if(

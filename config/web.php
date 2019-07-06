@@ -6,6 +6,7 @@ $db = require __DIR__ . '/db.php';
 $config = [
     'id' => 'safefood',
     'name' => 'Safefood',
+    'language'=>'nl',
     'basePath' => dirname(__DIR__),
     'bootstrap' => ['log'],
     'aliases' => [
@@ -57,9 +58,15 @@ $config = [
         ],
         'i18n' => [
             'translations' => [
+                'app' => [
+                    'class' => 'yii\i18n\DbMessageSource',
+                    'sourceLanguage' => 'nl',
+                ],
                 '*' => [
                     'class' => 'yii\i18n\DbMessageSource',
+                    'sourceLanguage' => 'nl',
                 ],
+                
             ],
         ],
     ],
