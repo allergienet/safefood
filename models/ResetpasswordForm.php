@@ -91,8 +91,8 @@ class ResetpasswordForm extends Model
         if(
             Yii::$app->mailer->compose('@app/mail/layouts/html.php',['content'=>$body])
             ->setTo($this->username)
-            ->setFrom('webmaster@klasmixer.be')
-            ->setSubject('Klasmixer - Account heractivatie')
+            ->setFrom('info@safefood.be')
+            ->setSubject('Safefood - Account heractivatie')
             ->send()){
             return true;
         }
